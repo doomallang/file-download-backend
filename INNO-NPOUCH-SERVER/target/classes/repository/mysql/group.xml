@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.innotium.npouch.repository.GroupRepository">
+	<select id="selectTopGroupList" resultType="ResGroup">
+		/* GroupRepository - selectTopGroupList */
+		SELECT 
+			grp.group_id, grp.group_name, grp.phone_number, grp.parent_group_id, 
+			(SELECT 
+				COUNT(*) 
+			FROM tb_group sgrp 
+			WHERE sgrp.parent_group_id = grp.group_id) as hasChild
+		FROM
+			tb_group grp
+		WHERE
+			parent_group_id = 0
+	</select>
+	
+	<select id="selectGroupList" resultType="ResGroup">
+		/* GroupRepository - selectGroupList */
+		SELECT 
+			grp.group_id, grp.group_name, grp.phone_number, grp.parent_group_id, 
+			(SELECT 
+				COUNT(*) 
+			FROM tb_group sgrp 
+			WHERE sgrp.parent_group_id = grp.group_id) as hasChild
+		FROM
+			tb_group grp
+		<where>
+			grp.parent_group_id= #{groupId}
+		</where>
+	</select>
+	
+	<!-- 그룹 등록 -->
+	<insert id="insertGroup">
+		/* GroupRepository insertGroup */
+		INSERT INTO tb_group(
+			group_name, phone_number, parent_group_id, create_id, update_id, create_datetime, update_datetime
+		)
+		VALUES (
+			#{groupName}, #{phoneNumber}, #{parentGroupId}, #{updateId}, #{updateId}, #{updateDatetime}, #{updateDatetime}
+		)
+	</insert>
+	
+	<!-- 그룹 수정 -->
+	<update id="updateGroup">
+		/* GroupRepository - updateGroup */
+		UPDATE tb_group
+		SET
+			<if test="@com.innotium.util.Util@isNotBlank(groupName)">
+				group_name = #{groupName},
+			</if>
+			<if test="@com.innotium.util.Util@isNotBlank(parentGroupId)">
+				parent_group_id = #{parentGroupId},
+			</if>
+			<if test="@com.innotium.util.Util@isNotBlank(phoneNumber)">
+				phone_number = #{phoneNumber},
+			</if>
+			update_id = #{updateId},
+			update_datetime = #{updateDatetime}
+		WHERE
+			group_id = #{groupId}
+	</update>
+	
+	<!-- 그룹 삭제 -->
+	<delete id="deleteGroup">
+	/* GroupRepository - deleteGroup */
+	DELETE
+		FROM tb_group
+	WHERE group_id = #{groupId}
+	</delete>
+	
+	<!-- 그룹 가져오기 -->
+	<select id="selectGroup" resultType="ResGroup">
+		/* GroupRepository selectGroup */
+		SELECT
+			grp.group_id, grp.group_name, grp.phone_number, grp.parent_group_id, grp.create_datetime, grp.update_datetime, grp.create_id, grp.update_id,
+			(SELECT sgrp.group_name FROM tb_group sgrp WHERE grp.parent_group_id = sgrp.group_id) as parentGroupName
+		FROM tb_group grp
+		<where>
+			AND grp.group_id = #{groupId}
+		</where>
+	</select>
+</mapper>

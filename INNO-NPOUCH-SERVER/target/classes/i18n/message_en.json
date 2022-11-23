@@ -1,0 +1,13 @@
+{
+	"MENU":{
+		"NAME":{
+			"LOGIN": "LOGIN"
+		}
+	},
+	"ACCOUNT":{
+		"NAME":{
+			"ID": "ID",
+			"PASSWORD": "PASSWORD"
+		}
+	}
+}

@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.innotium.npouch.repository.AccountRepository">	
+	<select id="isAccountExist" resultType="int">
+		/* AccountRepository - isAccountExist */
+		SELECT
+			COUNT(*)
+		FROM
+			tb_account ac
+		WHERE
+			ac.account_id = #{accountId}
+	</select>
+	
+	<select id="selectAccountListCount" resultType="int">
+		/* AccountRepository - selectAccountListCount */
+		SELECT 
+			count(*) as cnt
+		FROM
+			tb_account ac
+		<where>
+			<if test="@com.innotium.npouch.util.Util@isNotBlank(searchText)">
+				<if test='@com.innotium.util.Util@equals(searchTextOption, "account_id")'>
+					ac.account_id LIKE CONCAT('%', #{searchText}, '%')
+				</if>
+				<if test='@com.innotium.util.Util@equals(searchTextOption, "name")'>
+					ac.name LIKE CONCAT('%', #{searchText}, '%')
+				</if>
+			</if>
+		</where>
+		
+	</select>
+	
+	<select id="selectAccountList" resultType="ResAccount">
+		/* AccountRepository - selectAccountList */
+		SELECT 
+			ac.account_idx, ac.account_id, ac.password, ac.name,
+			ac.group_id, ac.status, ac.grade, ac.create_datetime,
+			ac.update_datetime, (SELECT grp.group_name FROM tb_group grp WHERE ac.group_id = grp.group_id) as groupName
+		FROM
+			tb_account ac
+		<where>
+			<if test="@com.innotium.npouch.util.Util@isNotBlank(searchText)">
+				<if test='@com.innotium.util.Util@equals(searchTextOption, "account_id")'>
+					ac.account_id LIKE CONCAT('%', #{searchText}, '%')
+				</if>
+				<if test='@com.innotium.util.Util@equals(searchTextOption, "name")'>
+					ac.name LIKE CONCAT('%', #{searchText}, '%')
+				</if>
+			</if>
+		</where>
+		LIMIT #{startIndex}, #{pageSize}
+	</select>
+	
+	<select id="selectAccountListByGroupIdCount" resultType="int">
+		/* AccountRepository - selectAccountListByGroupIdCount */
+		SELECT 
+			count(*) as cnt
+		FROM
+			tb_account ac
+		<where>
+			AND ac.group_id = #{groupId}
+		</where>
+	</select>
+	
+	<select id="selectAccountListByGroupId" resultType="ResAccount">
+		/* AccountRepository - selectAccountListByGroupId */
+		SELECT 
+			ac.account_idx, ac.account_id, ac.password, ac.name,
+			ac.group_id, ac.status, ac.grade, ac.create_datetime,
+			ac.update_datetime, (SELECT grp.group_name FROM tb_group grp WHERE ac.group_id = grp.group_id) as groupName
+		FROM
+			tb_account ac
+		<where>
+			AND ac.group_id = #{groupId}
+		</where>
+	</select>
+	
+	<select id="selectAccountByAccountId" resultType="ResAccount">
+		/* AccountRepository - selectAccountByAccountId */
+		SELECT 
+			ac.account_idx, ac.account_id, ac.name, ac.password, ac.status
+		FROM
+			tb_account ac
+		<where>
+			ac.account_id = #{accountId}
+		</where>
+	</select>
+	
+	<select id="selectAccount" resultType="ResAccount">
+		/* AccountRepository - selectAccountByAccountId */
+		SELECT 
+			ac.account_idx, ac.account_id, ac.name, ac.password, ac.status
+		FROM
+			tb_account ac
+		<where>
+			ac.account_idx = #{accountIdx}
+		</where>
+	</select>
+	
+	<insert id="insertAccount" useGeneratedKeys="true" keyProperty="accountIdx">
+		/* AccountRepository insertAccount */
+		INSERT INTO tb_account(
+			account_id, name, password, group_id 
+		) 
+		VALUES (
+			#{accountId}, #{name}, #{password}, #{groupId}
+		)
+	</insert>
+	
+	<!-- 그룹 수정 -->
+	<update id="updateAccounts">
+		/* AccountRepository - updateAccounts */
+		UPDATE tb_account
+		SET
+			group_id = #{groupId},
+			update_id = #{updateId},
+			update_datetime = #{updateDatetime}
+		<where>
+			account_idx IN (
+				<foreach item="item" index="index" collection="accountIdxs" separator="," >
+					#{item}
+				</foreach>
+			)
+		</where>
+	</update>
+</mapper>
