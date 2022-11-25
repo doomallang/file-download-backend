@@ -1,0 +1,46 @@
+#spring
+spring:
+  main:
+    allow-circular-references: true
+  session:
+    store-type: REDIS
+  redis:
+    host: 127.0.0.1
+    port: 6379
+    password: redis123
+    timeout: 3600
+    database: 1
+  profiles:
+    active: local
+ 
+#server port
+server:
+  port: 8080
+  session:
+    timeout: 3600
+    
+#server info
+serverInfo:
+  project: main
+  mainDbName: npouchDownload
+  webURL: http://localhost:3000
+
+#authInfo
+authInfo:
+  headerKey: X-Cms-Token
+  headerId: X-Cms-Id
+  headerLang: Accept-Language
+  headerAccessClient: X-Access-Client
+  
+#logging:
+config: classpath:logback.xml
+
+#database
+datasource:
+  mariadb:
+    driverClassName: net.sf.log4jdbc.sql.jdbcapi.DriverSpy
+    jdbcUrl: jdbc:log4jdbc:mariadb://127.0.0.1:3306/npouchdownload?socketTimeout=300000
+    username: root
+    password: 1234
+    connectionTimeout: 10000
+    maxLifetime: 480000 
