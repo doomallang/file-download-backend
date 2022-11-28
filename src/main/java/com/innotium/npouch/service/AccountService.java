@@ -62,13 +62,14 @@ public class AccountService {
 		return authToken;
 	}
 	
-	public ListDataInfo<ResAccount> getAccountList(int startIndex, int pageSize, String searchText, String searchTextOption) {
+	public ListDataInfo<ResAccount> getAccountList(int startIndex, int pageSize, String searchOption, String searchOptionText, int[] statuses) {
 		Map<String, Object> paramMap = Maps.newHashMap();
 		paramMap.put("startIndex", startIndex);
 		paramMap.put("pageSize", pageSize);
-		paramMap.put("searchText", searchText);
-		paramMap.put("searchTextOption", searchTextOption);
-		
+		paramMap.put("searchOption", searchOption);
+		paramMap.put("searchOptionText", searchOptionText);
+		paramMap.put("statuses", statuses);
+		System.out.println(paramMap);
 		int totalCount = accountRepository.selectAccountListCount(paramMap);
 		List<ResAccount> list = accountRepository.selectAccountList(paramMap);
 		
@@ -76,21 +77,38 @@ public class AccountService {
 	}
 	
 	public ListDataInfo<ResAccount> getAccountListByGroupId(int groupId) {
-		System.out.println(groupId);
 		int totalCount = accountRepository.selectAccountListByGroupIdCount(groupId);
 		List<ResAccount> list = accountRepository.selectAccountListByGroupId(groupId);
 		
 		return new ListDataInfo<ResAccount>(list, totalCount);
 	}
 	
-	public void addAccount(String userId, String userPassword, String userName, int groupId) {
-		Map<String, Object> paramMap = Maps.newHashMap();
-		paramMap.put("userId", userId);
-		paramMap.put("userPassword", userPassword);
-		paramMap.put("userName", userName);
-		paramMap.put("groupId", groupId);
+	@Transactional
+	public void addAccount(String accountId, String name, String password, String grade, int groupId, int status) {
+		// 아이디 중복 여부
+		if(accountRepository.selectAccountIdExists(accountId) > 0) {
+			// 이미 등록된 아이디 입니다.
+			throw new FailException("SERVER.MESSAGE.ALREADY_REGISTERED_ID");
+		}
+		
+		AuthAccount authAccount = SessionUtil.getSessionInfo();
+		int registerId = authAccount.getAccountIdx();
+		Map<String, Object> paramMap = accountService.setAccountParamMap(0, accountId, name, password, grade, groupId, status, registerId);
+
+		paramMap.put("updateDatetime", Util.newDateString());
 		
 		accountService.insertAccount(paramMap);
+	}
+	
+	@Transactional
+	public void modifyAccount(int accountIdx, String name, String grade, int groupId, int status) {
+		AuthAccount authAccount = SessionUtil.getSessionInfo();
+		int registerId = authAccount.getAccountIdx();
+		Map<String, Object> paramMap = accountService.setAccountParamMap(accountIdx, null, name, null, grade, groupId, status, registerId);
+		System.out.println(paramMap);
+		paramMap.put("updateDatetime", Util.newDateString());
+		
+		accountService.updateAccount(paramMap);
 	}
 	
 	public ResAccount getSelectAccount(int accountIdx) {
@@ -103,12 +121,39 @@ public class AccountService {
 	public void modifyAccounts(int groupId, int[] accountIdxs) {
 		AuthAccount authAccount = SessionUtil.getSessionInfo();
 		int registerId = authAccount.getAccountIdx();
-		System.out.println(accountIdxs);
 		accountRepository.updateAccounts(groupId, accountIdxs, registerId, Util.newDateString());
+	}
+	
+	@Transactional
+	public void removeAccount(int[] accountIdxs) {
+		accountRepository.deleteAccount(accountIdxs);
+	}
+	
+	public Map<String, Object> setAccountParamMap(int accountIdx, String accountId, String name, String password, String grade, int groupId, int status, int registerId) {
+		Map<String, Object> paramMap = Maps.newHashMap();
+		if(accountIdx == 0) {
+			paramMap.put("accountIdx", null);
+		} else {
+			paramMap.put("accountIdx", accountIdx);
+		}
+
+		paramMap.put("accountId", accountId);
+		paramMap.put("name", name);
+		paramMap.put("password", password);
+		paramMap.put("grade", grade);
+		paramMap.put("groupId", groupId);
+		paramMap.put("status", status);
+		paramMap.put("updateId", registerId);
+
+		return paramMap;
 	}
 	
 	public void insertAccount(Map<String, Object> paramMap) {
 		accountRepository.insertAccount(paramMap);
+	}
+	
+	public void updateAccount(Map<String, Object> paramMap) {
+		accountRepository.updateAccount(paramMap);
 	}
 	
 	public int isAccountExist(String accountId) {

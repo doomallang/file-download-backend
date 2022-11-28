@@ -18,14 +18,19 @@
 		FROM
 			tb_account ac
 		<where>
-			<if test="@com.innotium.npouch.util.Util@isNotBlank(searchText)">
-				<if test='@com.innotium.util.Util@equals(searchTextOption, "account_id")'>
-					ac.account_id LIKE CONCAT('%', #{searchText}, '%')
+			<if test="@com.innotium.npouch.util.Util@isNotBlank(searchOptionText)">
+				<if test='@com.innotium.npouch.util.Util@equals(searchOption, "accountId")'>
+					AND ac.account_id LIKE CONCAT('%', #{searchOptionText}, '%')
 				</if>
-				<if test='@com.innotium.util.Util@equals(searchTextOption, "name")'>
-					ac.name LIKE CONCAT('%', #{searchText}, '%')
+				<if test='@com.innotium.npouch.util.Util@equals(searchOption, "name")'>
+					AND ac.name LIKE CONCAT('%', #{searchOptionText}, '%')
 				</if>
 			</if>
+			ac.status IN (
+				<foreach item="item" index="index" collection="statuses" separator="," >
+					#{item}
+				</foreach>
+			)
 		</where>
 		
 	</select>
@@ -39,14 +44,19 @@
 		FROM
 			tb_account ac
 		<where>
-			<if test="@com.innotium.npouch.util.Util@isNotBlank(searchText)">
-				<if test='@com.innotium.util.Util@equals(searchTextOption, "account_id")'>
-					ac.account_id LIKE CONCAT('%', #{searchText}, '%')
+			<if test="@com.innotium.npouch.util.Util@isNotBlank(searchOptionText)">
+				<if test='@com.innotium.npouch.util.Util@equals(searchOption, "accountId")'>
+					AND ac.account_id LIKE CONCAT('%', #{searchOptionText}, '%')
 				</if>
-				<if test='@com.innotium.util.Util@equals(searchTextOption, "name")'>
-					ac.name LIKE CONCAT('%', #{searchText}, '%')
+				<if test='@com.innotium.npouch.util.Util@equals(searchOption, "name")'>
+					AND ac.name LIKE CONCAT('%', #{searchOptionText}, '%')
 				</if>
 			</if>
+			ac.status IN (
+				<foreach item="item" index="index" collection="statuses" separator="," >
+					#{item}
+				</foreach>
+			)
 		</where>
 		LIMIT #{startIndex}, #{pageSize}
 	</select>
@@ -87,9 +97,11 @@
 	</select>
 	
 	<select id="selectAccount" resultType="ResAccount">
-		/* AccountRepository - selectAccountByAccountId */
+		/* AccountRepository - selectAccount */
 		SELECT 
-			ac.account_idx, ac.account_id, ac.name, ac.password, ac.status
+			ac.account_idx, ac.account_id, ac.name, ac.grade, ac.password, ac.group_id, ac.status,
+			ac.create_datetime, ac.update_datetime, ac.update_id, ac.create_id,
+			(SELECT group_name FROM tb_group grp WHERE ac.group_id = grp.group_id) as groupName
 		FROM
 			tb_account ac
 		<where>
@@ -97,22 +109,62 @@
 		</where>
 	</select>
 	
+	<!-- 사용자 추가 -->
 	<insert id="insertAccount" useGeneratedKeys="true" keyProperty="accountIdx">
 		/* AccountRepository insertAccount */
 		INSERT INTO tb_account(
-			account_id, name, password, group_id 
+			account_id, name, password, grade, group_id, status, create_id, update_id, create_datetime, update_datetime
 		) 
 		VALUES (
-			#{accountId}, #{name}, #{password}, #{groupId}
+			#{accountId}, #{name}, #{password}, #{grade}, #{groupId}, #{status}, #{updateId}, #{updateId}, #{updateDatetime}, #{updateDatetime}
 		)
-	</insert>
+	</insert>	
 	
-	<!-- 그룹 수정 -->
+	<!-- 사용자 list 그룹 수정 -->
+	<update id="updateAccount">
+		/* AccountRepository - updateAccount */
+		UPDATE tb_account
+		SET
+			<if test="@com.innotium.npouch.util.Util@isNotBlank(name)">
+				name = #{name},
+			</if>
+			<if test="@com.innotium.npouch.util.Util@isNotBlank(grade)">
+				grade = #{grade},
+			</if>
+			<if test="@com.innotium.npouch.util.Util@isNotBlank(groupId)">
+				group_id = #{groupId},
+			</if>
+			<if test="@com.innotium.npouch.util.Util@isNotBlank(status)">
+				status = #{status},
+			</if>
+			update_id = #{updateId},
+			update_datetime = #{updateDatetime}
+		<where>
+			account_idx = #{accountIdx}
+		</where>
+	</update>
+	
+	<!-- 사용자 삭제 -->
+	<delete id="deleteAccount">
+		/* AccountRepository - deleteAccount  */
+		DELETE FROM tb_account
+		<where>
+			account_idx IN (
+			<foreach item="item" index="index" collection="accountIdxs" separator="," >
+				#{item}
+			</foreach>
+			)
+		</where>
+	</delete>
+	
+	<!-- 사용자 list 그룹 수정 -->
 	<update id="updateAccounts">
 		/* AccountRepository - updateAccounts */
 		UPDATE tb_account
 		SET
-			group_id = #{groupId},
+			<if test="@com.innotium.npouch.util.Util@isNotBlank(groupId)">
+				group_id = #{groupId},
+			</if>
 			update_id = #{updateId},
 			update_datetime = #{updateDatetime}
 		<where>
@@ -123,4 +175,16 @@
 			)
 		</where>
 	</update>
+	
+	<!-- 계정존재 여부 -->
+	<select id="selectAccountIdExists" resultType="int">
+		/* AccountRepository - selectAccountIdExists  */
+		SELECT EXISTS (
+			SELECT 
+				ac.account_idx 
+			FROM tb_account ac
+			WHERE 
+				ac.account_id = #{accountId}
+		) AS selectExists
+	</select>
 </mapper>

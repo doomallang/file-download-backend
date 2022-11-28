@@ -24,9 +24,15 @@ public interface AccountRepository {
 	
 	public void insertAccount(Map<String, Object> paramMap);
 	
+	public void updateAccount(Map<String, Object> paramMap);
+	
+	public void deleteAccount(@Param("accountIdxs") int[] accountIdxs);
+	
 	public ResAccount selectAccount(@Param("accountIdx") int accountIdx);
 	
 	public ResAccount selectAccountByAccountId(@Param("accountId") String accountId);
+	
+	public int selectAccountIdExists(@Param("accountId") String accountId);
 	
 	public void updateAccounts(@Param("groupId") int groupId, @Param("accountIdxs") int[] accountIdxs, @Param("updateId") int updateId, @Param("updateDatetime") String updateDatetime);
 

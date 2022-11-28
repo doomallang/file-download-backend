@@ -42,4 +42,9 @@ public class Util {
 
 		return null;
 	}
+	
+	/** equal */
+	public static boolean equals(String str1, String str2) {
+		return StringUtils.equals(str1, str2);
+	}
 }

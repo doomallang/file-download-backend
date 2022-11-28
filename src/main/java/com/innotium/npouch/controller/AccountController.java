@@ -5,6 +5,8 @@ import java.util.Objects;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -21,6 +23,7 @@ import com.innotium.npouch.dto.AuthToken;
 import com.innotium.npouch.dto.ListDataInfo;
 import com.innotium.npouch.dto.ReqAccount;
 import com.innotium.npouch.dto.ResAccount;
+import com.innotium.npouch.dto.ResSuccess;
 import com.innotium.npouch.enums.HeaderParameters;
 import com.innotium.npouch.service.AccountService;
 
@@ -44,30 +47,55 @@ public class AccountController {
 	public ResponseEntity<ListDataInfo<ResAccount>> getAccountList(
 			@RequestParam(name="startIndex", required=false, defaultValue="0") int startIndex,
 			@RequestParam(name="pageSize", required=false, defaultValue="20") int pageSize,
-			@RequestParam(name="searchText", required=false, defaultValue="") String searchText,
-			@RequestParam(name="searchTextOption", required=false, defaultValue="") String searchTextOption) {
-
-		ListDataInfo<ResAccount> listDataInfo = accountService.getAccountList(startIndex, pageSize, searchText, searchTextOption);
+			@RequestParam(name="searchOption", required=false, defaultValue="") String searchOption,
+			@RequestParam(name="searchOptionText", required=false, defaultValue="") String searchOptionText,
+			@RequestParam(name="statuses", required=false, defaultValue="") int[] statuses) {
+		
+		ListDataInfo<ResAccount> listDataInfo = accountService.getAccountList(startIndex, pageSize, searchOption, searchOptionText, statuses);
 				
 		return new ResponseEntity<>(listDataInfo, HttpStatus.OK);
 	}
 	
-	@RequestMapping(value = "/api/account/addAccount", method = RequestMethod.POST)
-	public void addAccount(HttpServletRequest request, @RequestBody ReqAccount reqAccount) {
+	@RequestMapping(value = "/api/account", method = RequestMethod.POST)
+	public ResSuccess addAccount(HttpServletRequest request, @RequestBody ReqAccount reqAccount) {
 		String accountId = reqAccount.getAccountId();
-		String password = reqAccount.getPassword();
 		String name = reqAccount.getName();
+		String password = reqAccount.getPassword();
+		String grade = reqAccount.getGrade();
 		int groupId = reqAccount.getGroupId();
+		int status = reqAccount.getStatus();
 		
-		accountService.addAccount(accountId, password, name, groupId);
+		accountService.addAccount(accountId, name, password, grade, groupId, status);
+		
+		return new ResSuccess();
 	}
 	
-	@RequestMapping(value = "/api/account/getSelectAccount", method = RequestMethod.GET)
-	public ResAccount getSelectAccount(@RequestParam(name="accountId", required=true) int accountId) {
-
-		ResAccount resAccount = accountService.getSelectAccount(accountId);
+	@RequestMapping(value = "/api/account", method = RequestMethod.GET)
+	public ResAccount getSelectAccount(@RequestParam(name="accountIdx", required=true) int accountIdx) {
+		ResAccount resAccount = accountService.getSelectAccount(accountIdx);
 		
 		return resAccount;
+	}
+	
+	@RequestMapping(value = "/api/account", method = RequestMethod.PUT)
+	public ResSuccess modifyAccount(@RequestBody ReqAccount reqAccount) {
+		
+		int accountIdx = ObjectUtils.defaultIfNull(reqAccount.getAccountIdx(), -1);
+		String name = StringUtils.trim(reqAccount.getName());
+		String grade = StringUtils.trim(reqAccount.getGrade());
+		int groupId = ObjectUtils.defaultIfNull(reqAccount.getGroupId(), -1);
+		int status = ObjectUtils.defaultIfNull(reqAccount.getStatus(), -1);
+		
+		accountService.modifyAccount(accountIdx, name, grade, groupId, status);
+		
+		return new ResSuccess();
+	}
+	
+	@RequestMapping(value = "/api/account", method = RequestMethod.DELETE)
+	public ResSuccess removeAccount(@RequestParam(name="accountIdxs", required=true) int[] accountIdxs) {
+		accountService.removeAccount(accountIdxs);
+		
+		return new ResSuccess();
 	}
 	
 	@RequestMapping(value = "/api/account/getAccountListByGroupId", method = RequestMethod.GET)
@@ -80,7 +108,7 @@ public class AccountController {
 	
 	@RequestMapping(value = "/api/account/modifyAccounts", method = RequestMethod.PUT)
 	public void modifyAccounts(
-			@RequestParam(name="groupId", required=true) int groupId,
+			@RequestParam(name="groupId", required=false, defaultValue="-1") int groupId,
 			@RequestParam(name="accountIdxs", required=true) int[] accountIdxs) {
 
 		accountService.modifyAccounts(groupId, accountIdxs);

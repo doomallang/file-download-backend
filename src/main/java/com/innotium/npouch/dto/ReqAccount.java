@@ -6,5 +6,12 @@ import lombok.Builder;
 import lombok.Data;
 
 @Data
-public class ReqAccount extends Account {
+public class ReqAccount {
+	private Integer accountIdx;
+	private String accountId;
+	private String password;
+	private String name;
+	private Integer groupId;
+	private Integer status;
+	private String grade;
 }
