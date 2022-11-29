@@ -62,6 +62,15 @@ public class AccountService {
 		return authToken;
 	}
 	
+	public ResAccount getAccountInfo() {
+		AuthAccount authAccount = SessionUtil.getSessionInfo();
+		int accountIdx = authAccount.getAccountIdx();
+		
+		ResAccount resAccount = accountService.selectAccount(accountIdx);
+		
+		return resAccount;
+	}
+	
 	public ListDataInfo<ResAccount> getAccountList(int startIndex, int pageSize, String searchOption, String searchOptionText, int[] statuses) {
 		Map<String, Object> paramMap = Maps.newHashMap();
 		paramMap.put("startIndex", startIndex);
@@ -101,10 +110,10 @@ public class AccountService {
 	}
 	
 	@Transactional
-	public void modifyAccount(int accountIdx, String name, String grade, int groupId, int status) {
+	public void modifyAccount(int accountIdx, String name, String password, String grade, int groupId, int status) {
 		AuthAccount authAccount = SessionUtil.getSessionInfo();
 		int registerId = authAccount.getAccountIdx();
-		Map<String, Object> paramMap = accountService.setAccountParamMap(accountIdx, null, name, null, grade, groupId, status, registerId);
+		Map<String, Object> paramMap = accountService.setAccountParamMap(accountIdx, null, name, password, grade, groupId, status, registerId);
 		System.out.println(paramMap);
 		paramMap.put("updateDatetime", Util.newDateString());
 		

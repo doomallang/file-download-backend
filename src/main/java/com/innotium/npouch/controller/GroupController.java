@@ -25,14 +25,14 @@ public class GroupController {
 	@Autowired
 	private GroupService groupService;
 	
-	@RequestMapping(value = "/api/group/getTopGroupList", method = RequestMethod.GET)
+	@RequestMapping(value = "/apim/group/getTopGroupList", method = RequestMethod.GET)
 	public ResponseEntity<List<ResGroup>> getTopGroupList(HttpServletRequest request) {
 		List<ResGroup> dtoGroupList = groupService.getTopGroupList();
 		
 		return new ResponseEntity<>(dtoGroupList, HttpStatus.OK);
 	}
 	
-	@RequestMapping(value = "/api/group/getSelectGroupList", method = RequestMethod.GET)
+	@RequestMapping(value = "/apim/group/getSelectGroupList", method = RequestMethod.GET)
 	public ResponseEntity<List<ResGroup>> getSelectGroupList(HttpServletRequest request,
 			@RequestParam(name="groupId", required=true) int groupId,
 			@RequestParam(name="exceptGroupId", required=false, defaultValue="-1") int exceptGroupId) {
@@ -41,7 +41,7 @@ public class GroupController {
 		return new ResponseEntity<>(resGroupList, HttpStatus.OK);
 	}
 	
-	@RequestMapping(value = "/api/group", method = RequestMethod.POST)
+	@RequestMapping(value = "/apim/group", method = RequestMethod.POST)
 	public void addGroup(HttpServletRequest request,
 			@RequestBody ReqGroup reqGroup) {
 		String groupName = reqGroup.getGroupName();
@@ -51,7 +51,7 @@ public class GroupController {
 		groupService.addGroup(groupName, phoneNumber, parentGroupId);
 	}
 	
-	@RequestMapping(value = "/api/group", method = RequestMethod.GET)
+	@RequestMapping(value = "/apim/group", method = RequestMethod.GET)
 	public ResponseEntity<ResGroup> addGroup(HttpServletRequest request,
 			@RequestParam(name="groupId", required=true) int groupId) {
 
@@ -60,7 +60,7 @@ public class GroupController {
 		return new ResponseEntity<>(resGroup, HttpStatus.OK);		
 	}
 	
-	@RequestMapping(value = "/api/group", method = RequestMethod.PUT)
+	@RequestMapping(value = "/apim/group", method = RequestMethod.PUT)
 	public void modifyGroup(HttpServletRequest request,
 			@RequestBody ReqGroup reqGroup) {
 		
@@ -72,7 +72,7 @@ public class GroupController {
 		groupService.modifyGroup(groupId, groupName, phoneNumber, parentGroupId);
 	}
 	
-	@RequestMapping(value = "/api/group", method = RequestMethod.DELETE)
+	@RequestMapping(value = "/apim/group", method = RequestMethod.DELETE)
 	public void removeGroup(@RequestParam(name="groupId", required=true) int groupId) {
 
 		groupService.removeGroup(groupId);

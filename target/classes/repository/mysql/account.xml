@@ -99,7 +99,7 @@
 	<select id="selectAccount" resultType="ResAccount">
 		/* AccountRepository - selectAccount */
 		SELECT 
-			ac.account_idx, ac.account_id, ac.name, ac.grade, ac.password, ac.group_id, ac.status,
+			ac.account_idx, ac.account_id, ac.name, ac.grade, ac.group_id, ac.status,
 			ac.create_datetime, ac.update_datetime, ac.update_id, ac.create_id,
 			(SELECT group_name FROM tb_group grp WHERE ac.group_id = grp.group_id) as groupName
 		FROM
@@ -113,10 +113,10 @@
 	<insert id="insertAccount" useGeneratedKeys="true" keyProperty="accountIdx">
 		/* AccountRepository insertAccount */
 		INSERT INTO tb_account(
-			account_id, name, password, grade, group_id, status, create_id, update_id, create_datetime, update_datetime
+			account_id, name, password, grade, group_id, status, create_id, update_id, create_datetime, update_datetime, password_change_datetime
 		) 
 		VALUES (
-			#{accountId}, #{name}, #{password}, #{grade}, #{groupId}, #{status}, #{updateId}, #{updateId}, #{updateDatetime}, #{updateDatetime}
+			#{accountId}, #{name}, #{password}, #{grade}, #{groupId}, #{status}, #{updateId}, #{updateId}, #{updateDatetime}, #{updateDatetime}, #{updateDatetime}
 		)
 	</insert>	
 	
@@ -127,6 +127,10 @@
 		SET
 			<if test="@com.innotium.npouch.util.Util@isNotBlank(name)">
 				name = #{name},
+			</if>
+			<if test="@com.innotium.npouch.util.Util@isNotBlank(password)">
+				password = #{password},
+				password_change_datetime = #{updateDatetime},
 			</if>
 			<if test="@com.innotium.npouch.util.Util@isNotBlank(grade)">
 				grade = #{grade},

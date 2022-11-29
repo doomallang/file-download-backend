@@ -35,7 +35,7 @@ public class AccountController {
 	private AccountService accountService;
 	
 	@LoginNotRequire
-	@RequestMapping(value = "/api/account/login", method = RequestMethod.POST)
+	@RequestMapping(value = "/apim/account/login", method = RequestMethod.POST)
 	public ResponseEntity<AuthToken> login(HttpServletRequest request, @RequestBody ReqAccount reqAccount) {
 		String accountId = reqAccount.getAccountId();
 		String password = reqAccount.getPassword();
@@ -43,7 +43,7 @@ public class AccountController {
 		return new ResponseEntity<>(authToken, HttpStatus.OK);
 	}
 	
-	@RequestMapping(value = "/api/account/getAccountList", method = RequestMethod.GET)
+	@RequestMapping(value = "/apim/account/getAccountList", method = RequestMethod.GET)
 	public ResponseEntity<ListDataInfo<ResAccount>> getAccountList(
 			@RequestParam(name="startIndex", required=false, defaultValue="0") int startIndex,
 			@RequestParam(name="pageSize", required=false, defaultValue="20") int pageSize,
@@ -56,7 +56,21 @@ public class AccountController {
 		return new ResponseEntity<>(listDataInfo, HttpStatus.OK);
 	}
 	
-	@RequestMapping(value = "/api/account", method = RequestMethod.POST)
+	@RequestMapping(value = "/api/account", method = RequestMethod.GET)
+	public ResAccount getAccountInfo() {
+		ResAccount resAccount = accountService.getAccountInfo();
+		
+		return resAccount;
+	}
+	
+	@RequestMapping(value = "/apim/account", method = RequestMethod.GET)
+	public ResAccount getSelectAccount(@RequestParam(name="accountIdx", required=true) int accountIdx) {
+		ResAccount resAccount = accountService.getSelectAccount(accountIdx);
+		
+		return resAccount;
+	}
+	
+	@RequestMapping(value = "/apim/account", method = RequestMethod.POST)
 	public ResSuccess addAccount(HttpServletRequest request, @RequestBody ReqAccount reqAccount) {
 		String accountId = reqAccount.getAccountId();
 		String name = reqAccount.getName();
@@ -70,35 +84,29 @@ public class AccountController {
 		return new ResSuccess();
 	}
 	
-	@RequestMapping(value = "/api/account", method = RequestMethod.GET)
-	public ResAccount getSelectAccount(@RequestParam(name="accountIdx", required=true) int accountIdx) {
-		ResAccount resAccount = accountService.getSelectAccount(accountIdx);
-		
-		return resAccount;
-	}
-	
-	@RequestMapping(value = "/api/account", method = RequestMethod.PUT)
+	@RequestMapping(value = "/apim/account", method = RequestMethod.PUT)
 	public ResSuccess modifyAccount(@RequestBody ReqAccount reqAccount) {
 		
 		int accountIdx = ObjectUtils.defaultIfNull(reqAccount.getAccountIdx(), -1);
 		String name = StringUtils.trim(reqAccount.getName());
+		String password = StringUtils.trim(reqAccount.getPassword());
 		String grade = StringUtils.trim(reqAccount.getGrade());
 		int groupId = ObjectUtils.defaultIfNull(reqAccount.getGroupId(), -1);
 		int status = ObjectUtils.defaultIfNull(reqAccount.getStatus(), -1);
 		
-		accountService.modifyAccount(accountIdx, name, grade, groupId, status);
+		accountService.modifyAccount(accountIdx, name, password, grade, groupId, status);
 		
 		return new ResSuccess();
 	}
 	
-	@RequestMapping(value = "/api/account", method = RequestMethod.DELETE)
+	@RequestMapping(value = "/apim/account", method = RequestMethod.DELETE)
 	public ResSuccess removeAccount(@RequestParam(name="accountIdxs", required=true) int[] accountIdxs) {
 		accountService.removeAccount(accountIdxs);
 		
 		return new ResSuccess();
 	}
 	
-	@RequestMapping(value = "/api/account/getAccountListByGroupId", method = RequestMethod.GET)
+	@RequestMapping(value = "/apim/account/getAccountListByGroupId", method = RequestMethod.GET)
 	public ResponseEntity<ListDataInfo<ResAccount>> getAccountListByGroupId(@RequestParam(name="groupId", required=true) int groupId) {
 		
 		ListDataInfo<ResAccount> listDataInfo = accountService.getAccountListByGroupId(groupId);
@@ -106,7 +114,7 @@ public class AccountController {
 		return new ResponseEntity<>(listDataInfo, HttpStatus.OK);
 	}
 	
-	@RequestMapping(value = "/api/account/modifyAccounts", method = RequestMethod.PUT)
+	@RequestMapping(value = "/apim/account/modifyAccounts", method = RequestMethod.PUT)
 	public void modifyAccounts(
 			@RequestParam(name="groupId", required=false, defaultValue="-1") int groupId,
 			@RequestParam(name="accountIdxs", required=true) int[] accountIdxs) {

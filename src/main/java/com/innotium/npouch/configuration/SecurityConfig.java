@@ -2,23 +2,27 @@ package com.innotium.npouch.configuration;
 
 import static java.util.stream.Collectors.toList;
 
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
+import java.sql.Timestamp;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collector;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.InternalAuthenticationServiceException;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.session.web.http.HeaderHttpSessionIdResolver;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
@@ -30,8 +34,7 @@ import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandl
 
 import com.google.common.collect.Lists;
 import com.innotium.npouch.annotation.LoginNotRequire;
-import com.innotium.npouch.dto.DtoRole;
-import com.innotium.npouch.model.enums.UserRole;
+import com.innotium.npouch.dto.ResErrorMessage;
 import com.innotium.npouch.service.CustomAuthenticationProvider;
 
 @Configuration
@@ -63,7 +66,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 			.antMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 			.antMatchers("/api/account/login").permitAll()
 			//.antMatchers("/api/**").hasAnyAuthority(UserRole.MANAGER.getName(), UserRole.GROUP.getName(), UserRole.USER.getName())
-			.antMatchers("/api/**").permitAll()
+			.antMatchers("/api/**").authenticated()
 			.anyRequest().authenticated();
 	}
 	
