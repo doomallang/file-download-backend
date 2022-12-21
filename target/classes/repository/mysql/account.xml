@@ -7,13 +7,14 @@
 			COUNT(*)
 		FROM
 			tb_account ac
-		WHERE
-			ac.account_id = #{accountId}
+		<where>
+			AND ac.account_id = #{accountId}
+		</where>
 	</select>
 	
 	<select id="selectAccountListCount" resultType="int">
 		/* AccountRepository - selectAccountListCount */
-		SELECT 
+		SELECT
 			count(*) as cnt
 		FROM
 			tb_account ac
@@ -26,7 +27,7 @@
 					AND ac.name LIKE CONCAT('%', #{searchOptionText}, '%')
 				</if>
 			</if>
-			ac.status IN (
+			AND ac.status IN (
 				<foreach item="item" index="index" collection="statuses" separator="," >
 					#{item}
 				</foreach>
@@ -52,7 +53,7 @@
 					AND ac.name LIKE CONCAT('%', #{searchOptionText}, '%')
 				</if>
 			</if>
-			ac.status IN (
+			AND ac.status IN (
 				<foreach item="item" index="index" collection="statuses" separator="," >
 					#{item}
 				</foreach>
@@ -92,7 +93,7 @@
 		FROM
 			tb_account ac
 		<where>
-			ac.account_id = #{accountId}
+			AND ac.account_id = #{accountId}
 		</where>
 	</select>
 	
@@ -105,7 +106,7 @@
 		FROM
 			tb_account ac
 		<where>
-			ac.account_idx = #{accountIdx}
+			AND ac.account_idx = #{accountIdx}
 		</where>
 	</select>
 	
@@ -144,7 +145,7 @@
 			update_id = #{updateId},
 			update_datetime = #{updateDatetime}
 		<where>
-			account_idx = #{accountIdx}
+			AND account_idx = #{accountIdx}
 		</where>
 	</update>
 	
@@ -153,7 +154,7 @@
 		/* AccountRepository - deleteAccount  */
 		DELETE FROM tb_account
 		<where>
-			account_idx IN (
+			AND account_idx IN (
 			<foreach item="item" index="index" collection="accountIdxs" separator="," >
 				#{item}
 			</foreach>
@@ -172,7 +173,7 @@
 			update_id = #{updateId},
 			update_datetime = #{updateDatetime}
 		<where>
-			account_idx IN (
+			AND account_idx IN (
 				<foreach item="item" index="index" collection="accountIdxs" separator="," >
 					#{item}
 				</foreach>

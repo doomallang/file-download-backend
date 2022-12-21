@@ -96,7 +96,7 @@
 			SELECT
 				pgr.group_id
 			FROM tb_group pgr
-		INNER JOIN tb_group cgr ON pg.group_id = cgr.parent_group_id
+		INNER JOIN tb_group cgr ON pgr.group_id = cgr.parent_group_id
 			INNER JOIN cte ct ON cgr.group_id = ct.group_id
 		)
 		SELECT 
