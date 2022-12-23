@@ -41,7 +41,7 @@ public class AccountService {
 		Authentication authentication = null;
 		int isAccountExist = accountService.isAccountExist(accountId);
 		String sessionToken = "";
-		System.out.println("gggggggggg");
+		System.out.println();
 		// 계정 유무 확인
 		if (isAccountExist < 1) {
 			throw new FailException("SERVER.MESSAGE.ID_DOES_NOT_EXISTS");
